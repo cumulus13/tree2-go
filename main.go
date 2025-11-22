@@ -16,16 +16,20 @@ import (
 	"strings"
 )
 
+// ANSI Color Codes dengan True Color (24-bit)
 const (
-	ColorReset  = "\033[0m"
-	ColorRed    = "\033[91m"
-	ColorGreen  = "\033[92m"
-	ColorYellow = "\033[93m"
-	ColorBlue   = "\033[94m"
-	ColorMagenta = "\033[95m"
-	ColorCyan   = "\033[96m"
-	ColorOrange = "\033[38;5;214m"
+	ColorReset        = "\033[0m"
+	// ColorRed          = "\033[91m"
+	ColorRed          = "\033[1;97;41m" 
+	ColorYellow       = "\033[93m" // Fallback yellow
+	ColorCyan         = "\033[96m" // Fallback cyan
+	ColorOrange       = "\033[38;5;214m"
 	ColorLightMagenta = "\033[38;5;213m"
+	
+	// True Color (24-bit) ANSI codes
+	ColorBrightYellow = "\033[38;2;255;255;0m"    // #FFFF00
+	ColorBrightCyan   = "\033[38;2;0;255;255m"    // #00FFFF
+	ColorLightMagentaTrue = "\033[38;2;255;128;255m" // Light magenta
 )
 
 type Config struct {
@@ -110,9 +114,9 @@ func printTree(path string, prefix string, config *Config) {
 		}
 
 		if entry.IsDir() {
-			// Folder dengan warna kuning
+			// Folder dengan warna kuning terang (#FFFF00)
 			folderText := fmt.Sprintf("%s%s📁 %s/", prefix, connector, entry.Name())
-			fmt.Println(ColorYellow + folderText + ColorReset)
+			fmt.Println(ColorBrightYellow + folderText + ColorReset)
 
 			newPrefix := prefix
 			if idx == len(entries)-1 {
@@ -132,15 +136,15 @@ func printTree(path string, prefix string, config *Config) {
 			parts := strings.Split(sizeStr, " ")
 			sizeValue, sizeUnit := parts[0], parts[1]
 
-			// File dengan warna cyan
+			// File dengan warna cyan terang (#00FFFF)
 			filePart := fmt.Sprintf("%s%s📄 %s (", prefix, connector, entry.Name())
-			fmt.Print(ColorCyan + filePart + ColorReset)
+			fmt.Print(ColorBrightCyan + filePart + ColorReset)
 
 			// Size value
 			if size == 0 {
 				fmt.Print(ColorRed + sizeValue + ColorReset)
 			} else {
-				fmt.Print(ColorLightMagenta + sizeValue + ColorReset)
+				fmt.Print(ColorLightMagentaTrue + sizeValue + ColorReset)
 			}
 
 			fmt.Print(" ")
@@ -158,13 +162,11 @@ func main() {
 		helpFlag    bool
 	)
 
-	// Setup flags
 	flag.StringVar(&excludeList, "e", "", "Exclude patterns (comma-separated)")
 	flag.StringVar(&excludeList, "exclude", "", "Exclude patterns (comma-separated)")
 	flag.BoolVar(&helpFlag, "h", false, "Show help")
 	flag.BoolVar(&helpFlag, "help", false, "Show help")
 
-	// Custom usage
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s [path] [options]\n\n", os.Args[0])
 		fmt.Println("Print directory tree with file sizes, exclusions, and .gitignore support.")
@@ -183,17 +185,14 @@ func main() {
 		return
 	}
 
-	// Get path from arguments
 	path := "."
 	if flag.NArg() > 0 {
 		path = flag.Arg(0)
 	}
 
-	// Parse exclude patterns
 	var excludes []string
 	if excludeList != "" {
 		excludes = strings.Split(excludeList, ",")
-		// Trim spaces from each exclude pattern
 		for i, ex := range excludes {
 			excludes[i] = strings.TrimSpace(ex)
 		}
@@ -212,9 +211,9 @@ func main() {
 		RootExcludes: gitignoreExcludes,
 	}
 
-	// Print root directory
+	// Print root directory dengan warna kuning terang
 	rootText := fmt.Sprintf("📂 %s/", absPath)
-	fmt.Println(ColorYellow + rootText + ColorReset)
+	fmt.Println(ColorBrightYellow + rootText + ColorReset)
 
 	printTree(absPath, "", config)
 }
