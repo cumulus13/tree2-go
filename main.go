@@ -16,7 +16,13 @@ import (
 	"strings"
 )
 
-// ANSI Color Codes dengan True Color (24-bit)
+const (
+	Version = "1.0.3"
+	Author  = "Hadi Cahyadi <cumulus13@gmail.com>"
+	Repo    = "https://github.com/cumulus13/tree2-go"
+)
+
+// ANSI Color Codes with True Color (24-bit)
 const (
 	ColorReset        = "\033[0m"
 	// ColorRed          = "\033[91m"
@@ -35,6 +41,12 @@ const (
 type Config struct {
 	Excludes     []string
 	RootExcludes []string
+}
+
+func showVersion() {
+	fmt.Printf("tree2 version %s\n", Version)
+	fmt.Printf("Author: %s\n", Author)
+	fmt.Printf("Repository: %s\n", Repo)
 }
 
 func humanSize(size int64) string {
@@ -114,7 +126,7 @@ func printTree(path string, prefix string, config *Config) {
 		}
 
 		if entry.IsDir() {
-			// Folder dengan warna kuning terang (#FFFF00)
+			// Folder in light yellow (#FFFF00)
 			folderText := fmt.Sprintf("%s%s📁 %s/", prefix, connector, entry.Name())
 			fmt.Println(ColorBrightYellow + folderText + ColorReset)
 
@@ -136,7 +148,7 @@ func printTree(path string, prefix string, config *Config) {
 			parts := strings.Split(sizeStr, " ")
 			sizeValue, sizeUnit := parts[0], parts[1]
 
-			// File dengan warna cyan terang (#00FFFF)
+			// File with light cyan color (#00FFFF)
 			filePart := fmt.Sprintf("%s%s📄 %s (", prefix, connector, entry.Name())
 			fmt.Print(ColorBrightCyan + filePart + ColorReset)
 
@@ -149,7 +161,7 @@ func printTree(path string, prefix string, config *Config) {
 
 			fmt.Print(" ")
 
-			// Size unit dengan warna orange
+			// Unit size in orange
 			fmt.Print(ColorOrange + sizeUnit + ColorReset)
 			fmt.Println(")")
 		}
@@ -160,12 +172,15 @@ func main() {
 	var (
 		excludeList string
 		helpFlag    bool
+		versionFlag bool
 	)
 
 	flag.StringVar(&excludeList, "e", "", "Exclude patterns (comma-separated)")
 	flag.StringVar(&excludeList, "exclude", "", "Exclude patterns (comma-separated)")
 	flag.BoolVar(&helpFlag, "h", false, "Show help")
 	flag.BoolVar(&helpFlag, "help", false, "Show help")
+	flag.BoolVar(&versionFlag, "v", false, "Show version")
+	flag.BoolVar(&versionFlag, "version", false, "Show version")
 
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s [path] [options]\n\n", os.Args[0])
@@ -185,6 +200,11 @@ func main() {
 		return
 	}
 
+	if versionFlag {
+		showVersion()
+		return
+	}
+	
 	path := "."
 	if flag.NArg() > 0 {
 		path = flag.Arg(0)
@@ -211,7 +231,7 @@ func main() {
 		RootExcludes: gitignoreExcludes,
 	}
 
-	// Print root directory dengan warna kuning terang
+	// Print the root directory in bright yellow
 	rootText := fmt.Sprintf("📂 %s/", absPath)
 	fmt.Println(ColorBrightYellow + rootText + ColorReset)
 
